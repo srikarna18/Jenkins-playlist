@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pull code from Git
+                git branch: 'main', url: 'https://github.com/your-repo/project.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Build your application using Maven
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run unit tests
+                sh 'mvn test'
+            }
+        }
+
+        stage('Docker Build and Push') {
+            steps {
+                script {
+                    // Use stored Docker credentials
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        // Build Docker image
+                        sh 'docker build -t your-docker-image .'
+                        
+                        // Log in to Docker Hub
+                        sh 'docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"'
+
+                        // Push the Docker image
+                        sh 'docker push your-docker-image'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Deploy to your server (could be through SSH, Kubernetes, etc.)
+                sh 'echo "Deploying application..."'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished"
+        }
+    }
+}
