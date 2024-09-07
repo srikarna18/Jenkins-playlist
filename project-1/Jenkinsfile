@@ -1,11 +1,16 @@
 pipeline {
     agent any
 
+    tools{
+        java 'jdk17'
+        maven 'maven3'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 // Pull code from Git
-                git branch: 'main', url: 'https://github.com/your-repo/project.git'
+                checkout scmGit(branches: [[name: 'main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/srikarna18/Jenkins-playlist.git']])
             }
         }
 
@@ -16,10 +21,10 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('compile') {
             steps {
                 // Run unit tests
-                sh 'mvn test'
+                sh 'mvn clean compile'
             }
         }
 
